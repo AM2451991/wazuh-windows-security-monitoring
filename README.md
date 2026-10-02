@@ -1,4 +1,4 @@
-**\*\*# Wazuh Windows Security Monitoring \\\& Detection Lab\*\***
+# Wazuh Windows Security Monitoring & Detection Lab
 
 
 
@@ -6,7 +6,7 @@
 
 
 
-**\*\*## Project Overview\*\***
+## Project Overview
 
 
 
@@ -14,7 +14,7 @@
 
 
 
-**\*\*This project demonstrates a local Security Operations Center (SOC) monitoring environment using \\\*\\\*Wazuh\\\*\\\* to collect and analyze Windows security telemetry.\*\***
+This project demonstrates a local Security Operations Center (SOC) monitoring environment using ***Wazuh*** to collect and analyze Windows security telemetry.
 
 
 
@@ -22,7 +22,7 @@
 
 
 
-**\*\*The lab focuses on Windows process-creation monitoring, PowerShell activity detection, custom Wazuh detection rules, alert investigation, and MITRE ATT\\\&CK mapping.\*\***
+The lab focuses on Windows process-creation monitoring, PowerShell activity detection, custom Wazuh detection rules, alert investigation, and MITRE ATT&CK mapping.
 
 
 
@@ -30,7 +30,7 @@
 
 
 
-**\*\*### Objective\*\***
+### Objective
 
 
 
@@ -38,7 +38,7 @@
 
 
 
-**\*\*Build practical experience with the SOC workflow:\*\***
+Build practical experience with the SOC workflow:
 
 
 
@@ -46,7 +46,7 @@
 
 
 
-**\*\*\\\*\\\*Collect → Detect → Investigate → Analyze → Map → Document\\\*\\\*\*\***
+**Collect → Detect → Investigate → Analyze → Map → Document**
 
 
 
@@ -54,7 +54,7 @@
 
 
 
-**\*\*---\*\***
+---
 
 
 
@@ -62,7 +62,7 @@
 
 
 
-**\*\*## Lab Architecture\*\***
+## Lab Architecture
 
 
 
@@ -70,623 +70,654 @@
 
 
 
-**\*\*```text\*\***
+```text
+Windows 11 Endpoint
+       │
+       │ Windows Security Events
+       │ Event ID 4688
+       ▼
+  Wazuh Agent
+       │
+       ▼
+  Wazuh Manager
+       │
+       ▼
+  Wazuh Rules Engine
+       │
+       ├── Built-in Rule 67027
+       │
+       └── Custom Rule 100100
+               │
+               ▼
+         Level 10 Alert
+               │
+               ▼
+      Wazuh Dashboard
+```
 
 
 
-**\*\*Windows 11 Endpoint\*\***
 
 
 
-**\&#x20;       \*\*│\*\***
 
+### Environment
 
 
-**\&#x20;       \*\*│ Windows Security Events\*\***
 
 
 
-**\&#x20;       \*\*│ Event ID 4688\*\***
 
 
+| ***Component***  | ***Configuration***  |
+| ---------------- | -------------------- |
+| Wazuh Manager    | Wazuh 4.14.8         |
+| Wazuh Agent      | Windows 11           |
+| Agent Name       | `Cloud-Security-Lab` |
+| Wazuh Manager IP | `192.168.56.102`     |
+| Network          | VirtualBox Host-Only |
+| Virtualization   | Oracle VirtualBox    |
 
-**\&#x20;       \*\*▼\*\***
 
 
 
-**\&#x20;  \*\*Wazuh Agent\*\***
 
 
 
-**\&#x20;       \*\*│\*\***
+---
 
 
 
-**\&#x20;       \*\*▼\*\***
 
 
 
-**\&#x20;  \*\*Wazuh Manager\*\***
 
+## 1. Wazuh Environment
 
 
-**\&#x20;       \*\*│\*\***
 
 
 
-**\&#x20;       \*\*▼\*\***
 
 
+A Wazuh virtual appliance was deployed in VirtualBox and configured as the central monitoring server.
 
-**\&#x20;  \*\*Wazuh Rules Engine\*\***
 
 
 
-**\&#x20;       \*\*│\*\***
 
 
 
-**\&#x20;       \*\*├── Built-in Rule 67027\*\***
+The environment includes:
 
 
 
-**\&#x20;       \*\*│\*\***
 
 
 
-**\&#x20;       \*\*└── Custom Rule 100100\*\***
 
+* Wazuh Manager
 
 
-**\&#x20;               \*\*│\*\***
 
+* Wazuh Indexer
 
 
-**\&#x20;               \*\*▼\*\***
 
+* Wazuh Dashboard
 
 
-**\&#x20;         \*\*Level 10 Alert\*\***
 
+* Windows 11 endpoint with Wazuh agent
 
 
-**\&#x20;               \*\*│\*\***
 
 
 
-**\&#x20;               \*\*▼\*\***
 
 
+The Wazuh virtual machine was configured with:
 
-**\&#x20;      \*\*Wazuh Dashboard\*\***
 
 
 
-**\*\*```\*\***
 
 
 
+* **6 GB RAM**
 
 
 
+* **4 processors**
 
-**\*\*### Environment\*\***
 
 
+* **25 GB disk**
 
 
 
 
 
-**\*\*| Component        | Configuration        |\*\***
 
 
+The Wazuh server communicates with the Windows endpoint through a VirtualBox Host-Only network.
 
-**\*\*| ---------------- | -------------------- |\*\***
 
 
 
-**\*\*| Wazuh Manager    | Wazuh 4.14.8         |\*\***
 
 
 
-**\*\*| Wazuh Agent      | Windows 11           |\*\***
+---
 
 
 
-**\*\*| Agent Name       | `Cloud-Security-Lab` |\*\***
 
 
 
-**\*\*| Wazuh Manager IP | `192.168.56.102`     |\*\***
 
+## 2. Windows Agent
 
 
-**\*\*| Network          | VirtualBox Host-Only |\*\***
 
 
 
-**\*\*| Virtualization   | Oracle VirtualBox    |\*\***
 
 
+The Windows 11 endpoint was registered with Wazuh using the agent name:
 
 
 
 
 
-**\*\*---\*\***
 
 
+```text
+Cloud-Security-Lab
+```
 
 
 
 
 
-**\*\*## 1. Wazuh Environment\*\***
 
 
+The endpoint was successfully connected to the Wazuh manager and began forwarding Windows security telemetry.
 
 
 
 
 
-**\*\*A Wazuh virtual appliance was deployed in VirtualBox and configured as the central monitoring server.\*\***
 
 
+---
 
 
 
 
 
-**\*\*The environment includes:\*\***
 
 
+## 3. Windows Security Monitoring
 
 
 
 
 
-**\*\*\\\* Wazuh Manager\*\***
 
 
+The primary telemetry used in this project is:
 
-**\*\*\\\* Wazuh Indexer\*\***
 
 
 
-**\*\*\\\* Wazuh Dashboard\*\***
 
 
 
-**\*\*\\\* Windows 11 endpoint with Wazuh agent\*\***
+```text
+Event ID: 4688
 
+Event: A new process has been created
+```
 
 
 
 
 
 
-**\*\*The Wazuh virtual machine was configured with:\*\***
 
+Windows Event ID 4688 provides process execution information such as:
 
 
 
 
 
 
-**\*\*\\\* \\\*\\\*6 GB RAM\\\*\\\*\*\***
 
+* User account
 
 
-**\*\*\\\* \\\*\\\*4 processors\\\*\\\*\*\***
 
+* Process name
 
 
-**\*\*\\\* \\\*\\\*25 GB disk\\\*\\\*\*\***
 
+* Parent process
 
 
 
+* Process ID
 
 
 
-**\*\*The Wazuh server communicates with the Windows endpoint through a VirtualBox Host-Only network.\*\***
+* Command line
 
 
 
+* Logon information
 
 
 
+* Token elevation information
 
-**\*\*---\*\***
 
 
 
 
 
 
+This information can help SOC analysts identify suspicious process execution and command-line activity.
 
-**\*\*## 2. Windows Agent\*\***
 
 
 
 
 
+---
 
 
-**\*\*The Windows 11 endpoint was registered with Wazuh using the agent name:\*\***
 
 
 
 
 
+## 4. Initial Wazuh Detection
 
 
-**\*\*```text\*\***
 
 
 
-**\*\*Cloud-Security-Lab\*\***
 
 
+Wazuh successfully received Windows Event ID 4688 events from the endpoint.
 
-**\*\*```\*\***
 
 
 
 
 
 
+The built-in Wazuh rule used as the parent detection was:
 
-**\*\*The endpoint was successfully connected to the Wazuh manager and began forwarding Windows security telemetry.\*\***
 
 
 
 
 
 
+```text
+Rule ID: 67027
 
-**\*\*---\*\***
+Level: 3
 
+Description: A process was created.
+```
 
 
 
 
 
 
-**\*\*## 3. Windows Security Monitoring\*\***
 
+The Windows EventChannel decoder processed the Windows security event.
 
 
 
 
 
 
-**\*\*The primary telemetry used in this project is:\*\***
 
+---
 
 
 
 
 
 
-**\*\*```text\*\***
 
+# 5. Custom PowerShell Detection
 
 
-**\*\*Event ID: 4688\*\***
 
 
 
-**\*\*Event: A new process has been created\*\***
 
 
+## Detection Objective
 
-**\*\*```\*\***
 
 
 
 
 
 
+A custom Wazuh rule was created to detect PowerShell execution containing the:
 
-**\*\*Windows Event ID 4688 provides process execution information such as:\*\***
 
 
 
 
 
 
+```text
+-EncodedCommand
+```
 
-**\*\*\\\* User account\*\***
 
 
 
-**\*\*\\\* Process name\*\***
 
 
 
-**\*\*\\\* Parent process\*\***
+parameter.
 
 
 
-**\*\*\\\* Process ID\*\***
 
 
 
-**\*\*\\\* Command line\*\***
 
+Encoded PowerShell commands can conceal the readable contents of a command line and therefore provide useful telemetry for security investigation.
 
 
-**\*\*\\\* Logon information\*\***
 
 
 
-**\*\*\\\* Token elevation information\*\***
 
 
+The lab uses a controlled and harmless test command for validation.
 
 
 
 
 
-**\*\*This information can help SOC analysts identify suspicious process execution and command-line activity.\*\***
 
 
+---
 
 
 
 
 
-**\*\*---\*\***
 
 
+## Custom Wazuh Rule
 
 
 
 
 
-**\*\*## 4. Initial Wazuh Detection\*\***
 
 
+The final working rule is:
 
 
 
 
 
-**\*\*Wazuh successfully received Windows Event ID 4688 events from the endpoint.\*\***
 
 
+```xml
+<group name="windows,powershell,custom,">
+ <rule id="100100" level="10">
+   <if_sid>67027</if_sid>
+   <field name="win.eventdata.commandLine">-EncodedCommand</field>
+   <description>Encoded PowerShell command detected.</description>
+   <mitre>
+     <id>T1059.001</id>
+     <id>T1027</id>
+   </mitre>
+ </rule>
+</group>
+```
 
 
 
 
 
-**\*\*The built-in Wazuh rule used as the parent detection was:\*\***
 
 
+### Detection Logic
 
 
 
 
 
-**\*\*```text\*\***
 
 
+The rule:
 
-**\*\*Rule ID: 67027\*\***
 
 
 
-**\*\*Level: 3\*\***
 
 
 
-**\*\*Description: A process was created.\*\***
+1. Uses Wazuh rule ***67027*** as the parent event.
 
 
 
-**\*\*```\*\***
+2. Examines the Windows `commandLine` field.
 
 
 
+3. Searches for the `-EncodedCommand` parameter.
 
 
 
+4. Generates a custom ***Level 10*** alert.
 
-**\*\*The Windows EventChannel decoder processed the Windows security event.\*\***
 
 
+5. Maps the detection to relevant MITRE ATT&CK techniques.
 
 
 
 
 
-**\*\*---\*\***
 
 
+---
 
 
 
 
 
-**\*\*# 5. Custom PowerShell Detection\*\***
 
 
+# 6. MITRE ATT&CK Mapping
 
 
 
 
 
-**\*\*## Detection Objective\*\***
 
 
+### T1059.001 — PowerShell
 
 
 
 
 
-**\*\*A custom Wazuh rule was created to detect PowerShell execution containing the:\*\***
 
 
+The detection identifies PowerShell execution through Windows process-creation telemetry.
 
 
 
 
 
-**\*\*```text\*\***
 
 
+### T1027 — Obfuscated/Compressed Files and Information
 
-**\*\*-EncodedCommand\*\***
 
 
 
-**\*\*```\*\***
 
 
 
+The use of an encoded PowerShell command is treated as an obfuscation indicator that warrants investigation.
 
 
 
 
-**\*\*parameter.\*\***
 
 
 
+> The presence of an encoded command does not by itself prove malicious activity. An analyst must investigate the command, user, parent process, endpoint, and surrounding activity.
 
 
 
 
-**\*\*Encoded PowerShell commands can conceal the readable contents of a command line and therefore provide useful telemetry for security investigation.\*\***
 
 
 
+---
 
 
 
 
-**\*\*The lab uses a controlled and harmless test command for validation.\*\***
 
 
 
+# 7. Controlled Detection Test
 
 
 
 
-**\*\*---\*\***
 
 
 
+A controlled PowerShell command was executed on the Windows lab endpoint using the `-EncodedCommand` parameter.
 
 
 
 
-**\*\*## Custom Wazuh Rule\*\***
 
 
 
+The test command was designed to produce harmless output and was used solely to validate the detection.
 
 
 
 
-**\*\*The final working rule is:\*\***
 
 
 
+Windows generated:
 
 
 
 
-**\*\*```xml\*\***
 
 
 
-**\*\*<group name="windows,powershell,custom,">\*\***
+```text
+Event ID: 4688
 
+A new process has been created
+```
 
 
-**\&#x20; \*\*<rule id="100100" level="10">\*\***
 
 
 
-**\&#x20;   \*\*<if\\\_sid>67027</if\\\_sid>\*\***
 
 
+The event was forwarded to Wazuh for analysis.
 
-**\&#x20;   \*\*<field name="win.eventdata.commandLine">-EncodedCommand</field>\*\***
 
 
 
-**\&#x20;   \*\*<description>Encoded PowerShell command detected.</description>\*\***
 
 
 
-**\&#x20;   \*\*<mitre>\*\***
+---
 
 
 
-**\&#x20;     \*\*<id>T1059.001</id>\*\***
 
 
 
-**\&#x20;     \*\*<id>T1027</id>\*\***
 
+# 8. Alert Investigation
 
 
-**\&#x20;   \*\*</mitre>\*\***
 
 
 
-**\&#x20; \*\*</rule>\*\***
 
 
+The event was initially identified by the built-in process-creation rule:
 
-**\*\*</group>\*\***
 
 
 
-**\*\*```\*\***
 
 
 
+```text
+Rule ID: 67027
 
+Level: 3
 
+Description: A process was created.
+```
 
 
-**\*\*### Detection Logic\*\***
 
 
 
 
 
+The custom rule then evaluated the Windows command-line field.
 
 
-**\*\*The rule:\*\***
 
 
 
 
 
+When the command contained:
 
 
-**\*\*1. Uses Wazuh rule \\\*\\\*67027\\\*\\\* as the parent event.\*\***
 
 
 
-**\*\*2. Examines the Windows `commandLine` field.\*\***
 
 
+```text
+-EncodedCommand
+```
 
-**\*\*3. Searches for the `-EncodedCommand` parameter.\*\***
 
 
 
-**\*\*4. Generates a custom \\\*\\\*Level 10\\\*\\\* alert.\*\***
 
 
 
-**\*\*5. Maps the detection to relevant MITRE ATT\\\&CK techniques.\*\***
+the custom rule generated:
 
 
 
@@ -694,685 +725,361 @@
 
 
 
-**\*\*---\*\***
+```text
+Rule ID: 100100
 
+Level: 10
 
+Description: Encoded PowerShell command detected.
+```
 
 
 
 
 
-**\*\*# 6. MITRE ATT\\\&CK Mapping\*\***
 
 
+### Detection Flow
 
 
 
 
 
-**\*\*### T1059.001 — PowerShell\*\***
 
 
+```text
+PowerShell Execution
+       ↓
+Windows Event ID 4688
+       ↓
+Windows EventChannel Decoder
+       ↓
+Wazuh Rule 67027
+       ↓
+Custom Rule 100100
+       ↓
+Level 10 Alert
+       ↓
+SOC Investigation
+```
 
 
 
 
 
-**\*\*The detection identifies PowerShell execution through Windows process-creation telemetry.\*\***
 
 
+---
 
 
 
 
 
-**\*\*### T1027 — Obfuscated/Compressed Files and Information\*\***
 
 
+# 9. SOC Analyst Investigation Approach
 
 
 
 
 
-**\*\*The use of an encoded PowerShell command is treated as an obfuscation indicator that warrants investigation.\*\***
 
 
+If this alert occurred in a production environment, it would not automatically be treated as a confirmed security incident.
 
 
 
 
 
-**\*\*> The presence of an encoded command does not by itself prove malicious activity. An analyst must investigate the command, user, parent process, endpoint, and surrounding activity.\*\***
 
 
+The analyst would investigate:
 
 
 
 
 
-**\*\*---\*\***
 
 
+* Which user executed PowerShell?
 
 
 
+* What was the full command line?
 
 
-**\*\*# 7. Controlled Detection Test\*\***
 
+* What was the parent process?
 
 
 
+* Was the activity expected or authorized?
 
 
 
-**\*\*A controlled PowerShell command was executed on the Windows lab endpoint using the `-EncodedCommand` parameter.\*\***
+* Was the endpoint production or non-production?
 
 
 
+* What did the encoded command contain?
 
 
 
+* Were network connections associated with the process?
 
-**\*\*The test command was designed to produce harmless output and was used solely to validate the detection.\*\***
 
 
+* Did the process create or modify files?
 
 
 
+* Were additional suspicious events generated?
 
 
-**\*\*Windows generated:\*\***
 
+* Was the activity part of an administrative or automation task?
 
 
 
 
 
 
-**\*\*```text\*\***
 
+The analyst would correlate the available evidence before determining the appropriate response.
 
 
-**\*\*Event ID: 4688\*\***
 
 
 
-**\*\*A new process has been created\*\***
 
 
+---
 
-**\*\*```\*\***
 
 
 
 
 
 
+# 10. Evidence
 
-**\*\*The event was forwarded to Wazuh for analysis.\*\***
 
 
 
 
 
 
+The successful Level 10 detection is captured in:
 
-**\*\*---\*\***
 
 
 
 
 
 
+```Markdown
+![Wazuh Encoded PowerShell Level 10 Alert](Evidence/wazuh-encoded-powershell-level10-alert.png)
+```
 
-**\*\*# 8. Alert Investigation\*\***
 
 
 
 
 
 
+The evidence demonstrates:
 
-**\*\*The event was initially identified by the built-in process-creation rule:\*\***
 
 
 
 
 
 
+* Windows PowerShell process creation
 
-**\*\*```text\*\***
 
 
+* Encoded command-line activity
 
-**\*\*Rule ID: 67027\*\***
 
 
+* Wazuh detection
 
-**\*\*Level: 3\*\***
 
 
+* Custom rule `100100`
 
-**\*\*Description: A process was created.\*\***
 
 
+* Level 10 alert
 
-**\*\*```\*\***
 
 
+* Encoded PowerShell detection message
 
 
 
 
 
-**\*\*The custom rule then evaluated the Windows command-line field.\*\***
 
 
+---
 
 
 
 
 
-**\*\*When the command contained:\*\***
 
 
+# 11. Skills Demonstrated
 
 
 
 
 
-**\*\*```text\*\***
 
 
+This project demonstrates hands-on experience with:
 
-**\*\*-EncodedCommand\*\***
 
 
 
-**\*\*```\*\***
 
 
 
+* Wazuh SIEM monitoring
 
 
 
+* Windows Security Event Logs
 
-**\*\*the custom rule generated:\*\***
 
 
+* Windows Event ID 4688
 
 
 
+* PowerShell security monitoring
 
 
-**\*\*```text\*\***
 
+* Command-line analysis
 
 
-**\*\*Rule ID: 100100\*\***
 
+* Custom Wazuh detection rules
 
 
-**\*\*Level: 10\*\***
 
+* Rule chaining
 
 
-**\*\*Description: Encoded PowerShell command detected.\*\***
 
+* Alert triage
 
 
-**\*\*```\*\***
 
+* Event investigation
 
 
 
+* MITRE ATT&CK mapping
 
 
 
-**\*\*### Detection Flow\*\***
+* Virtualized security labs
 
 
 
+* SOC detection engineering fundamentals
 
 
 
 
-**\*\*```text\*\***
 
 
 
-**\*\*PowerShell Execution\*\***
+---
 
 
 
-**\&#x20;       \*\*↓\*\***
 
 
 
-**\*\*Windows Event ID 4688\*\***
 
+# 12. Project Outcome
 
 
-**\&#x20;       \*\*↓\*\***
 
 
 
-**\*\*Windows EventChannel Decoder\*\***
 
 
+The lab successfully demonstrated an end-to-end endpoint detection workflow:
 
-**\&#x20;       \*\*↓\*\***
 
 
 
-**\*\*Wazuh Rule 67027\*\***
 
 
 
-**\&#x20;       \*\*↓\*\***
+```text
+Windows Endpoint
+     ↓
+Security Telemetry
+     ↓
+Wazuh Agent
+     ↓
+Wazuh Manager
+     ↓
+Windows Event ID 4688
+     ↓
+Custom Detection Rule
+     ↓
+Level 10 Alert
+     ↓
+MITRE ATT&CK Mapping
+     ↓
+SOC Investigation
+```
 
 
 
-**\*\*Custom Rule 100100\*\***
 
 
 
-**\&#x20;       \*\*↓\*\***
 
+The project provided hands-on experience in transforming Windows endpoint telemetry into a targeted security detection using Wazuh.
 
 
-**\*\*Level 10 Alert\*\***
 
 
 
-**\&#x20;       \*\*↓\*\***
 
 
+---
 
-**\*\*SOC Investigation\*\***
 
 
 
-**\*\*```\*\***
 
 
 
+## Disclaimer
 
 
 
 
-**\*\*---\*\***
 
 
 
+This project was conducted entirely within a controlled local virtual lab environment.
 
 
 
 
-**\*\*# 9. SOC Analyst Investigation Approach\*\***
 
 
 
-
-
-
-
-**\*\*If this alert occurred in a production environment, it would not automatically be treated as a confirmed security incident.\*\***
-
-
-
-
-
-
-
-**\*\*The analyst would investigate:\*\***
-
-
-
-
-
-
-
-**\*\*\\\* Which user executed PowerShell?\*\***
-
-
-
-**\*\*\\\* What was the full command line?\*\***
-
-
-
-**\*\*\\\* What was the parent process?\*\***
-
-
-
-**\*\*\\\* Was the activity expected or authorized?\*\***
-
-
-
-**\*\*\\\* Was the endpoint production or non-production?\*\***
-
-
-
-**\*\*\\\* What did the encoded command contain?\*\***
-
-
-
-**\*\*\\\* Were network connections associated with the process?\*\***
-
-
-
-**\*\*\\\* Did the process create or modify files?\*\***
-
-
-
-**\*\*\\\* Were additional suspicious events generated?\*\***
-
-
-
-**\*\*\\\* Was the activity part of an administrative or automation task?\*\***
-
-
-
-
-
-
-
-**\*\*The analyst would correlate the available evidence before determining the appropriate response.\*\***
-
-
-
-
-
-
-
-**\*\*---\*\***
-
-
-
-
-
-
-
-**\*\*# 10. Evidence\*\***
-
-
-
-
-
-
-
-**\*\*The successful Level 10 detection is captured in:\*\***
-
-
-
-
-
-
-
-**\*\*```text\*\***
-
-
-
-**\*\*Evidence/wazuh-encoded-powershell-level10-alert.png\*\***
-
-
-
-**\*\*```\*\***
-
-
-
-
-
-
-
-**\*\*The evidence demonstrates:\*\***
-
-
-
-
-
-
-
-**\*\*\\\* Windows PowerShell process creation\*\***
-
-
-
-**\*\*\\\* Encoded command-line activity\*\***
-
-
-
-**\*\*\\\* Wazuh detection\*\***
-
-
-
-**\*\*\\\* Custom rule `100100`\*\***
-
-
-
-**\*\*\\\* Level 10 alert\*\***
-
-
-
-**\*\*\\\* Encoded PowerShell detection message\*\***
-
-
-
-
-
-
-
-**\*\*---\*\***
-
-
-
-
-
-
-
-**\*\*# 11. Skills Demonstrated\*\***
-
-
-
-
-
-
-
-**\*\*This project demonstrates hands-on experience with:\*\***
-
-
-
-
-
-
-
-**\*\*\\\* Wazuh SIEM monitoring\*\***
-
-
-
-**\*\*\\\* Windows Security Event Logs\*\***
-
-
-
-**\*\*\\\* Windows Event ID 4688\*\***
-
-
-
-**\*\*\\\* PowerShell security monitoring\*\***
-
-
-
-**\*\*\\\* Command-line analysis\*\***
-
-
-
-**\*\*\\\* Custom Wazuh detection rules\*\***
-
-
-
-**\*\*\\\* Rule chaining\*\***
-
-
-
-**\*\*\\\* Alert triage\*\***
-
-
-
-**\*\*\\\* Event investigation\*\***
-
-
-
-**\*\*\\\* MITRE ATT\\\&CK mapping\*\***
-
-
-
-**\*\*\\\* Virtualized security labs\*\***
-
-
-
-**\*\*\\\* SOC detection engineering fundamentals\*\***
-
-
-
-
-
-
-
-**\*\*---\*\***
-
-
-
-
-
-
-
-**\*\*# 12. Project Outcome\*\***
-
-
-
-
-
-
-
-**\*\*The lab successfully demonstrated an end-to-end endpoint detection workflow:\*\***
-
-
-
-
-
-
-
-**\*\*```text\*\***
-
-
-
-**\*\*Windows Endpoint\*\***
-
-
-
-**\&#x20;     \*\*↓\*\***
-
-
-
-**\*\*Security Telemetry\*\***
-
-
-
-**\&#x20;     \*\*↓\*\***
-
-
-
-**\*\*Wazuh Agent\*\***
-
-
-
-**\&#x20;     \*\*↓\*\***
-
-
-
-**\*\*Wazuh Manager\*\***
-
-
-
-**\&#x20;     \*\*↓\*\***
-
-
-
-**\*\*Windows Event ID 4688\*\***
-
-
-
-**\&#x20;     \*\*↓\*\***
-
-
-
-**\*\*Custom Detection Rule\*\***
-
-
-
-**\&#x20;     \*\*↓\*\***
-
-
-
-**\*\*Level 10 Alert\*\***
-
-
-
-**\&#x20;     \*\*↓\*\***
-
-
-
-**\*\*MITRE ATT\\\&CK Mapping\*\***
-
-
-
-**\&#x20;     \*\*↓\*\***
-
-
-
-**\*\*SOC Investigation\*\***
-
-
-
-**\*\*```\*\***
-
-
-
-
-
-
-
-**\*\*The project provided hands-on experience in transforming Windows endpoint telemetry into a targeted security detection using Wazuh.\*\***
-
-
-
-
-
-
-
-**\*\*---\*\***
-
-
-
-
-
-
-
-**\*\*## Disclaimer\*\***
-
-
-
-
-
-
-
-**\*\*This project was conducted entirely within a controlled local virtual lab environment.\*\***
-
-
-
-
-
-
-
-**\*\*The PowerShell activity used for validation was intentionally generated for detection testing and does not represent real malicious activity.\*\***
+The PowerShell activity used for validation was intentionally generated for detection testing and does not represent real malicious activity.
 
