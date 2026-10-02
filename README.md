@@ -877,12 +877,7 @@ The successful Level 10 detection is captured in:
 
 
 
-```Markdown
-![Wazuh Encoded PowerShell Level 10 Alert](Evidence/wazuh-encoded-powershell-level10-alert.png)
-```
-
-
-
+[Wazuh Encoded PowerShell Level 10 Alert](Evidence/wazuh-encoded-powershell-level10-alert.png)
 
 
 
